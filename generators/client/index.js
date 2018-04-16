@@ -1,7 +1,7 @@
 /**
  * Copyright 2013-2018 the original author or authors from the JHipster project.
  *
- * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * This file is part of the JHipster project, see http://www.jhipster.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +22,7 @@ const _ = require('lodash');
 const BaseGenerator = require('../generator-base');
 const prompts = require('./prompts');
 const writeAngularFiles = require('./files-angular').writeFiles;
+const writeAngularJsFiles = require('./files-angularjs').writeFiles;
 const writeReactFiles = require('./files-react').writeFiles;
 const packagejs = require('../../package.json');
 const constants = require('../generator-constants');
@@ -71,6 +72,13 @@ module.exports = class extends BaseGenerator {
             type: String
         });
 
+        // This adds support for a `--social` flag
+        this.option('social', {
+            desc: 'Provide development DB option for the application',
+            type: Boolean,
+            default: false
+        });
+
         // This adds support for a `--search-engine` flag
         this.option('search-engine', {
             desc: 'Provide development DB option for the application',
@@ -105,13 +113,6 @@ module.exports = class extends BaseGenerator {
             defaults: false
         });
 
-        // This adds support for a `--skip-commit-hook` flag
-        this.option('skip-commit-hook', {
-            desc: 'Skip adding husky commit hooks',
-            type: Boolean,
-            defaults: false
-        });
-
         // This adds support for a `--npm` flag
         this.option('npm', {
             desc: 'Use npm instead of yarn',
@@ -128,16 +129,7 @@ module.exports = class extends BaseGenerator {
 
         this.setupClientOptions(this);
         const blueprint = this.options.blueprint || this.configOptions.blueprint || this.config.get('blueprint');
-        // use global variable since getters dont have access to instance property
-        useBlueprint = this.composeBlueprint(
-            blueprint,
-            'client',
-            {
-                'skip-install': this.options['skip-install'],
-                configOptions: this.configOptions,
-                force: this.options.force
-            }
-        );
+        useBlueprint = this.composeBlueprint(blueprint, 'client'); // use global variable since getters dont have access to instance property
     }
 
     get initializing() {
@@ -162,7 +154,7 @@ module.exports = class extends BaseGenerator {
                 this.clientFramework = this.config.get('clientFramework');
                 if (!this.clientFramework) {
                     /* for backward compatibility */
-                    this.clientFramework = 'angularX';
+                    this.clientFramework = 'angular1';
                 }
                 if (this.clientFramework === 'angular2') {
                     /* for backward compatibility */
@@ -178,11 +170,6 @@ module.exports = class extends BaseGenerator {
                 const baseName = this.config.get('baseName');
                 if (baseName) {
                     this.baseName = baseName;
-                }
-
-                this.serviceDiscoveryType = this.config.get('serviceDiscoveryType') === 'no' ? false : this.config.get('serviceDiscoveryType');
-                if (this.serviceDiscoveryType === undefined) {
-                    this.serviceDiscoveryType = false;
                 }
 
                 const clientConfigFound = this.useSass !== undefined;
@@ -265,7 +252,6 @@ module.exports = class extends BaseGenerator {
                 this.config.set('clientFramework', this.clientFramework);
                 this.config.set('useSass', this.useSass);
                 this.config.set('enableTranslation', this.enableTranslation);
-                this.config.set('skipCommitHook', this.skipCommitHook);
                 if (this.enableTranslation && !this.configOptions.skipI18nQuestion) {
                     this.config.set('nativeLanguage', this.nativeLanguage);
                     this.config.set('languages', this.languages);
@@ -321,6 +307,9 @@ module.exports = class extends BaseGenerator {
                 if (this.configOptions.buildTool) {
                     this.buildTool = this.configOptions.buildTool;
                 }
+                if (this.configOptions.enableSocialSignIn !== undefined) {
+                    this.enableSocialSignIn = this.configOptions.enableSocialSignIn;
+                }
                 if (this.configOptions.authenticationType) {
                     this.authenticationType = this.configOptions.authenticationType;
                 }
@@ -371,6 +360,8 @@ module.exports = class extends BaseGenerator {
     writing() {
         if (useBlueprint) return;
         switch (this.clientFramework) {
+        case 'angular1':
+            return writeAngularJsFiles.call(this);
         case 'react':
             return writeReactFiles.call(this);
         default:
@@ -380,11 +371,16 @@ module.exports = class extends BaseGenerator {
 
     install() {
         if (useBlueprint) return;
-        const logMsg =
+        let logMsg =
             `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install`)}`;
 
+        if (this.clientFramework === 'angular1') {
+            logMsg =
+                `To install your dependencies manually, run: ${chalk.yellow.bold(`${this.clientPackageManager} install & bower install`)}`;
+        }
+
         const installConfig = {
-            bower: false,
+            bower: this.clientFramework === 'angular1',
             npm: this.clientPackageManager !== 'yarn',
             yarn: this.clientPackageManager === 'yarn'
         };
@@ -394,7 +390,11 @@ module.exports = class extends BaseGenerator {
         } else {
             this.installDependencies(installConfig).then(
                 () => {
-                    this.buildResult = this.spawnCommandSync(this.clientPackageManager, ['run', 'webpack:build']);
+                    if (this.clientFramework === 'angular1') {
+                        this.spawnCommandSync('gulp', ['install']);
+                    } else {
+                        this.buildResult = this.spawnCommandSync(this.clientPackageManager, ['run', 'webpack:build']);
+                    }
                 },
                 (err) => {
                     this.warning('Install of dependencies failed!');
@@ -411,9 +411,20 @@ module.exports = class extends BaseGenerator {
         }
         this.log(chalk.green.bold('\nClient application generated successfully.\n'));
 
-        const logMsg =
+        let logMsg =
             `Start your Webpack development server with:\n ${chalk.yellow.bold(`${this.clientPackageManager} start`)}\n`;
 
+        if (this.clientFramework === 'angular1') {
+            logMsg =
+                'Inject your front end dependencies into your source code:\n' +
+                ` ${chalk.yellow.bold('gulp inject')}\n\n` +
+                'Generate the AngularJS constants:\n' +
+                ` ${chalk.yellow.bold('gulp ngconstant:dev')}` +
+                `${this.useSass ? '\n\nCompile your Sass style sheets:\n\n' +
+                `${chalk.yellow.bold('gulp sass')}` : ''}\n\n` +
+                'Or do all of the above:\n' +
+                ` ${chalk.yellow.bold('gulp install')}\n`;
+        }
         this.log(chalk.green(logMsg));
     }
 };

@@ -1,7 +1,7 @@
 /**
  * Copyright 2013-2018 the original author or authors from the JHipster project.
  *
- * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * This file is part of the JHipster project, see http://www.jhipster.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,9 @@
  * limitations under the License.
  */
 const shelljs = require('shelljs');
-const path = require('path');
 const chalk = require('chalk');
 const jhiCore = require('jhipster-core');
 const BaseGenerator = require('../generator-base');
-const packagejs = require('../../package.json');
 
 module.exports = class extends BaseGenerator {
     constructor(args, opts) {
@@ -41,21 +39,6 @@ module.exports = class extends BaseGenerator {
             type: Boolean,
             defaults: false
         });
-
-        // Support for the '--ignore-application' flag
-        this.option('ignore-application', {
-            desc: 'Ignores application generation',
-            type: Boolean,
-            defaults: false
-        });
-
-        // This adds support for a `--skip-ui-grouping` flag
-        this.option('skip-ui-grouping', {
-            desc: 'Disable the UI grouping behaviour for entity client side code',
-            type: Boolean,
-            defaults: false
-        });
-        this.registerClientTransforms();
     }
 
     get initializing() {
@@ -64,7 +47,7 @@ module.exports = class extends BaseGenerator {
                 if (this.jdlFiles) {
                     this.jdlFiles.forEach((key) => {
                         if (!shelljs.test('-f', key)) {
-                            this.env.error(chalk.red(`\nCould not find ${key}, make sure the path is correct.\n`));
+                            this.env.error(chalk.red(`\nCould not find ${key}, make sure the path is correct!\n`));
                         }
                     });
                 }
@@ -78,7 +61,9 @@ module.exports = class extends BaseGenerator {
                 this.devDatabaseType = this.config.get('devDatabaseType') || this.options.db;
                 this.skipClient = this.config.get('skipClient');
                 this.clientFramework = this.config.get('clientFramework');
-                this.clientFramework = this.clientFramework || 'angularX';
+                if (!this.clientFramework) {
+                    this.clientFramework = 'angular1';
+                }
                 this.clientPackageManager = this.config.get('clientPackageManager');
                 if (!this.clientPackageManager) {
                     if (this.useYarn) {
@@ -99,165 +84,75 @@ module.exports = class extends BaseGenerator {
             },
 
             parseJDL() {
-                this.log('The JDL is being parsed.');
+                this.log('The jdl is being parsed.');
                 try {
-                    const parsed = jhiCore.parseFromFiles(this.jdlFiles);
-                    this.jdlObject = jhiCore.convertToJDLFromConfigurationObject({
-                        document: parsed,
-                        databaseType: this.prodDatabaseType,
-                        applicationType: this.applicationType,
-                        applicationName: this.baseName
-                    });
-                    if (shouldGenerateApplications(this, this.jdlObject)) {
-                        this.log('Writing application configuration files.');
-                        this.jdlObject.applications =
-                            setGeneratorVersionInJDLApplications(this.jdlObject.applications, packagejs.version);
-                        jhiCore.exportApplications({
-                            applications: this.jdlObject.applications,
-                            paths: getApplicationPaths(this.jdlObject.applications)
-                        });
-                    }
+                    const jdlObject = jhiCore.convertToJDL(
+                        jhiCore.parseFromFiles(this.jdlFiles),
+                        this.prodDatabaseType,
+                        this.applicationType,
+                        this.baseName
+                    );
                     const entities = jhiCore.convertToJHipsterJSON({
-                        jdlObject: this.jdlObject,
+                        jdlObject,
                         databaseType: this.prodDatabaseType,
                         applicationType: this.applicationType
                     });
                     this.log('Writing entity JSON files.');
-                    if (shouldGenerateApplications(this, this.jdlObject)) {
-                        this.changedEntities = jhiCore.exportEntitiesInApplications({
-                            entities,
-                            forceNoFiltering: this.options.force,
-                            applications: this.jdlObject.applications
-                        }).toArray();
+                    this.changedEntities = jhiCore.exportToJSON(entities, this.options.force);
+                    this.updatedKeys = Object.keys(this.changedEntities);
+                    if (this.updatedKeys.length > 0) {
+                        this.log(`Updated entities are: ${chalk.yellow(this.updatedKeys)}`);
                     } else {
-                        this.changedEntities = jhiCore.exportEntities({
-                            entities,
-                            forceNoFiltering: this.options.force,
-                            application: {
-                                type: this.applicationType,
-                                name: this.baseName
-                            }
-                        });
+                        this.log(chalk.yellow('No change in entity configurations. No entities were updated'));
                     }
-
-                    if (this.changedEntities.length > 0) {
-                        this.log(`Updated entities are: ${chalk.yellow(this.changedEntities)}.`);
-                    } else {
-                        this.log(chalk.yellow('No change in entity configurations. No entities were updated.'));
+                } catch (e) {
+                    this.debug('Error:', e);
+                    if (e && e.message) {
+                        this.log(chalk.red(`${e.name || ''}: ${e.message}`));
                     }
-                } catch (error) {
-                    this.debug('Error:', error);
-                    if (error) {
-                        const errorName = `${error.name}:` || '';
-                        const errorMessage = error.message || '';
-                        this.log(chalk.red(`${errorName} ${errorMessage}`));
-                    }
-                    this.error(`Error while parsing applications and entities from the JDL ${error}`);
+                    this.error('\nError while parsing entities from JDL\n');
                 }
             },
 
             generateEntities() {
-                if (this.changedEntities.length === 0) {
-                    return;
-                }
+                if (this.updatedKeys.length === 0) return;
                 if (this.options['json-only']) {
-                    this.log('Entity JSON files created. Entity generation skipped.');
+                    this.log('Entity JSON files created. Entitiy generation skipped.');
                     return;
                 }
+                this.log('Generating entities.');
                 try {
-                    if (shouldGenerateApplications(this, this.jdlObject)) {
-                        this.log('Generating applications.');
-                        Object.keys(this.jdlObject.applications).forEach((application) => {
-                            this.log(`Generating application ${application.baseName}.`);
-                            generateApplicationFiles(this, this.jdlObject.applications[application]);
-                        });
-                    }
-                    this.log('Generating entities.');
-                    this.getExistingEntities()
-                        .filter(entity => this.changedEntities.includes(entity.name))
-                        .forEach((entity) => {
-                            if (shouldGenerateApplications(this, this.jdlObject) && entity.applications !== '*') {
-                                entity.applications.forEach((applicationName) => {
-                                    const applicationPath = path.join(
-                                        shelljs.pwd().stdout,
-                                        this.jdlObject.applications[applicationName].config.path || ''
-                                    );
-                                    generateEntityFilesInPath(this, entity, applicationPath);
-                                });
-                            } else {
-                                generateEntityFiles(this, entity);
-                            }
-                        });
-                } catch (error) {
-                    this.error(`While generating applications and entities from the parsed JDL\n${error}`);
+                    this.getExistingEntities().forEach((entity) => {
+                        if (this.updatedKeys.includes(entity.name)) {
+                            this.composeWith(require.resolve('../entity'), {
+                                force: this.options.force,
+                                debug: this.options.debug,
+                                regenerate: true,
+                                'skip-install': true,
+                                'skip-client': entity.definition.skipClient,
+                                'skip-server': entity.definition.skipServer,
+                                'no-fluent-methods': entity.definition.noFluentMethod,
+                                'skip-user-management': entity.definition.skipUserManagement,
+                                arguments: [entity.name],
+                            });
+                        }
+                    });
+                } catch (e) {
+                    this.debug('Error:', e);
+                    this.error(`Error while generating entities from parsed JDL\n${e}`);
                 }
             }
         };
     }
 
     end() {
-        if (!this.options['skip-install'] && !this.skipClient && !this.options['json-only']
-                && !shouldGenerateApplications(this, this.jdlObject)) {
+        if (!this.options['skip-install'] && !this.skipClient && !this.options['json-only']) {
             this.debug('Building client');
-            this.rebuildClient();
+            if (this.clientFramework === 'angular1') {
+                this.injectJsFilesToIndex();
+            } else {
+                this.rebuildClient();
+            }
         }
     }
 };
-
-function shouldGenerateApplications(generationConfiguration, jdlObject) {
-    return !generationConfiguration.options['ignore-application'] && Object.keys(jdlObject.applications).length !== 0;
-}
-
-function getApplicationPaths(jdlApplications) {
-    const paths = {};
-    Object.keys(jdlApplications).forEach((baseName) => {
-        paths[baseName] = jdlApplications[baseName].config.path;
-    });
-    return paths;
-}
-
-function setGeneratorVersionInJDLApplications(jdlApplications, version) {
-    Object.keys(jdlApplications).forEach((applicationName) => {
-        jdlApplications[applicationName].config.jhipsterVersion = version;
-    });
-    return jdlApplications;
-}
-
-function generateApplicationFiles(generator, application) {
-    const initialWorkingDir = shelljs.pwd();
-    shelljs.cd(path.join(shelljs.pwd().stdout, application.path || ''));
-    callSubGenerator(generator, '..', 'app', {
-        force: generator.options.force,
-        debug: generator.options.debug,
-        'skip-install': generator.options['skip-install'],
-        'skip-user-management': application.config.skipUserManagement,
-        'jhi-prefix': application.config.jhiPrefix
-    });
-    shelljs.cd(initialWorkingDir);
-}
-
-function generateEntityFilesInPath(generator, entity, folderPath) {
-    const initialWorkingDir = shelljs.pwd();
-    shelljs.cd(folderPath);
-    generateEntityFiles(generator, entity);
-    shelljs.cd(initialWorkingDir);
-}
-
-function generateEntityFiles(generator, entity) {
-    callSubGenerator(generator, '..', 'entity', {
-        force: generator.options.force,
-        debug: generator.options.debug,
-        regenerate: true,
-        'skip-install': true,
-        'skip-client': entity.definition.skipClient,
-        'skip-server': entity.definition.skipServer,
-        'no-fluent-methods': entity.definition.noFluentMethod,
-        'skip-user-management': entity.definition.skipUserManagement,
-        'skip-ui-grouping': generator.options['skip-ui-grouping'],
-        arguments: [entity.name]
-    });
-}
-
-function callSubGenerator(currentGenerator, subgenPath, name, args) {
-    currentGenerator.composeWith(require.resolve(path.join(subgenPath, name)), args);
-}

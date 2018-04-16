@@ -1,7 +1,7 @@
 /**
  * Copyright 2013-2018 the original author or authors from the JHipster project.
  *
- * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * This file is part of the JHipster project, see http://www.jhipster.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,14 +27,9 @@ let useBlueprint;
 module.exports = class extends BaseGenerator {
     constructor(args, opts) {
         super(args, opts);
-        utils.copyObjectProps(this, opts.context);
+        utils.copyObjectProps(this, this.options.context);
         const blueprint = this.config.get('blueprint');
-        // use global variable since getters dont have access to instance property
-        useBlueprint = this.composeBlueprint(blueprint, 'entity-server', {
-            context: opts.context,
-            force: opts.force,
-            debug: opts.context.isDebugEnabled
-        });
+        useBlueprint = this.composeBlueprint(blueprint, 'entity'); // use global variable since getters dont have access to instance property
     }
 
     get writing() {

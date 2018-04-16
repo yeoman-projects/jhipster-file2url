@@ -1,7 +1,7 @@
 /**
  * Copyright 2013-2018 the original author or authors from the JHipster project.
  *
- * This file is part of the JHipster project, see https://www.jhipster.tech/
+ * This file is part of the JHipster project, see http://www.jhipster.tech/
  * for more information.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,7 +68,7 @@ module.exports = class extends PrivateBase {
     /**
      * Add a new menu element, at the root of the menu.
      *
-     * @param {string} routerName - The name of the Angular router that is added to the menu.
+     * @param {string} routerName - The name of the AngularJS router that is added to the menu.
      * @param {string} glyphiconName - The name of the Glyphicon (from Bootstrap) that will be displayed.
      * @param {boolean} enableTranslation - If translations are enabled or not
      * @param {string} clientFramework - The name of the client framework
@@ -76,7 +76,20 @@ module.exports = class extends PrivateBase {
     addElementToMenu(routerName, glyphiconName, enableTranslation, clientFramework) {
         let navbarPath;
         try {
-            if (clientFramework === 'angularX') {
+            if (clientFramework === 'angular1') {
+                navbarPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.html`;
+                jhipsterUtils.rewriteFile({
+                    file: navbarPath,
+                    needle: 'jhipster-needle-add-element-to-menu',
+                    splicable: [`<li ui-sref-active="active">
+                                <a ui-sref="${routerName}" ng-click="vm.collapseNavbar()">
+                                    <span class="glyphicon glyphicon-${glyphiconName}"></span>&nbsp;
+                                    <span${enableTranslation ? ` data-translate="global.menu.${routerName}"` : ''}>${_.startCase(routerName)}</span>
+                                </a>
+                            </li>`
+                    ]
+                }, this);
+            } else if (clientFramework === 'angularX') {
                 navbarPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.html`;
                 jhipsterUtils.rewriteFile({
                     file: navbarPath,
@@ -128,7 +141,7 @@ module.exports = class extends PrivateBase {
     /**
      * Add a new menu element to the admin menu.
      *
-     * @param {string} routerName - The name of the Angular router that is added to the admin menu.
+     * @param {string} routerName - The name of the AngularJS router that is added to the admin menu.
      * @param {string} glyphiconName - The name of the Glyphicon (from Bootstrap) that will be displayed.
      * @param {boolean} enableTranslation - If translations are enabled or not
      * @param {string} clientFramework - The name of the client framework
@@ -136,7 +149,20 @@ module.exports = class extends PrivateBase {
     addElementToAdminMenu(routerName, glyphiconName, enableTranslation, clientFramework) {
         let navbarAdminPath;
         try {
-            if (clientFramework === 'angularX') {
+            if (clientFramework === 'angular1') {
+                navbarAdminPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.html`;
+                jhipsterUtils.rewriteFile({
+                    file: navbarAdminPath,
+                    needle: 'jhipster-needle-add-element-to-admin-menu',
+                    splicable: [`<li ui-sref-active="active">
+                            <a ui-sref="${routerName}" ng-click="vm.collapseNavbar()">
+                                <span class="glyphicon glyphicon-${glyphiconName}"></span>&nbsp;
+                                <span${enableTranslation ? ` data-translate="global.menu.admin.${routerName}"` : ''}>${_.startCase(routerName)}</span>
+                            </a>
+                        </li>`
+                    ]
+                }, this);
+            } else {
                 navbarAdminPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.html`;
                 jhipsterUtils.rewriteFile({
                     file: navbarAdminPath,
@@ -163,6 +189,10 @@ module.exports = class extends PrivateBase {
      * @param {string} clientFramework - The name of the client framework
      */
     addEntityToWebpack(microserviceName, clientFramework) {
+        if (clientFramework === 'angular1') {
+            return;
+        }
+
         const webpackDevPath = `${CLIENT_WEBPACK_DIR}/webpack.dev.js`;
         jhipsterUtils.rewriteFile({
             file: webpackDevPath,
@@ -174,14 +204,27 @@ module.exports = class extends PrivateBase {
     /**
      * Add a new entity in the "entities" menu.
      *
-     * @param {string} routerName - The name of the Angular router (which by default is the name of the entity).
+     * @param {string} routerName - The name of the AngularJS router (which by default is the name of the entity).
      * @param {boolean} enableTranslation - If translations are enabled or not
      * @param {string} clientFramework - The name of the client framework
      */
-    addEntityToMenu(routerName, enableTranslation, clientFramework, entityTranslationKeyMenu = _.camelCase(routerName)) {
+    addEntityToMenu(routerName, enableTranslation, clientFramework) {
         let entityMenuPath;
         try {
-            if (this.clientFramework === 'angularX') {
+            if (clientFramework === 'angular1') {
+                entityMenuPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.html`;
+                jhipsterUtils.rewriteFile({
+                    file: entityMenuPath,
+                    needle: 'jhipster-needle-add-entity-to-menu',
+                    splicable: [`<li ui-sref-active="active">
+                                <a ui-sref="${routerName}" ng-click="vm.collapseNavbar()">
+                                    <span class="glyphicon glyphicon-asterisk"></span>&nbsp;
+                                    <span${enableTranslation ? ` data-translate="global.menu.entities.${_.camelCase(routerName)}"` : ''}>${_.startCase(routerName)}</span>
+                                </a>
+                            </li>`
+                    ]
+                }, this);
+            } else if (this.clientFramework === 'angularX') {
                 entityMenuPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.html`;
                 jhipsterUtils.rewriteFile({
                     file: entityMenuPath,
@@ -190,7 +233,7 @@ module.exports = class extends PrivateBase {
                         this.stripMargin(`|<li>
                              |                        <a class="dropdown-item" routerLink="${routerName}" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
                              |                            <i class="fa fa-fw fa-asterisk" aria-hidden="true"></i>
-                             |                            <span${enableTranslation ? ` jhiTranslate="global.menu.entities.${entityTranslationKeyMenu}"` : ''}>${_.startCase(routerName)}</span>
+                             |                            <span${enableTranslation ? ` jhiTranslate="global.menu.entities.${_.camelCase(routerName)}"` : ''}>${_.startCase(routerName)}</span>
                              |                        </a>
                              |                    </li>`)
                     ]
@@ -203,7 +246,7 @@ module.exports = class extends PrivateBase {
                     needle: 'jhipster-needle-add-entity-to-menu',
                     splicable: [
                         this.stripMargin(`|(
-                        |        <DropdownItem tag={Link} key="${routerName}" to="/entity/${routerName}">
+                        |        <DropdownItem tag={Link} key="${routerName}" to="/${routerName}">
                         |          <FaAsterisk />&nbsp;
                         |          ${_.startCase(routerName)}
                         |        </DropdownItem>
@@ -228,22 +271,19 @@ module.exports = class extends PrivateBase {
      * @param {boolean} enableTranslation - If translations are enabled or not
      * @param {string} clientFramework - The name of the client framework
      */
-    addEntityToModule(entityInstance, entityClass, entityAngularName, entityFolderName, entityFileName, enableTranslation, clientFramework, microServiceName) {
+    addEntityToModule(entityInstance, entityClass, entityAngularName, entityFolderName, entityFileName, enableTranslation, clientFramework) {
         const entityModulePath = `${CLIENT_MAIN_SRC_DIR}app/entities/entity.module.ts`;
         try {
-            if (clientFramework === 'angularX') {
+            if (clientFramework === 'angular1') {
+                return;
+            } else if (clientFramework === 'angularX') {
                 const appName = this.getAngularXAppName();
-                let importName = `${appName}${entityAngularName}Module`;
-                if (microServiceName) {
-                    importName = `${importName} as ${this.upperFirstCamelCase(microServiceName)}${entityAngularName}Module`;
-                }
-                let importStatement = `|import { ${importName} } from './${entityFolderName}/${entityFileName}.module';`;
+                let importStatement = `|import { ${appName}${entityAngularName}Module } from './${entityFolderName}/${entityFileName}.module';`;
                 if (importStatement.length > constants.LINE_LENGTH) {
                     importStatement =
-                        `|// prettier-ignore
-                         |import {
-                         |    ${importName}
-                         |} from './${entityFolderName}/${entityFileName}.module';`;
+                        `|import {
+                        |    ${appName}${entityAngularName}Module
+                        |} from './${entityFolderName}/${entityFileName}.module';`;
                 }
                 jhipsterUtils.rewriteFile({
                     file: entityModulePath,
@@ -257,7 +297,7 @@ module.exports = class extends PrivateBase {
                     file: entityModulePath,
                     needle: 'jhipster-needle-add-entity-module',
                     splicable: [
-                        this.stripMargin(microServiceName ? `|${this.upperFirstCamelCase(microServiceName)}${entityAngularName}Module,` : `|${appName}${entityAngularName}Module,`)
+                        this.stripMargin(`|${appName}${entityAngularName}Module,`)
                     ]
                 }, this);
             } else {
@@ -276,17 +316,17 @@ module.exports = class extends PrivateBase {
                     file: indexModulePath,
                     needle: 'jhipster-needle-add-route-path',
                     splicable: [
-                        this.stripMargin(`|<Route path={\`\${match.url}/${entityFileName}\`} component={${entityAngularName}}/>`)
+                        this.stripMargin(`|<Route path={'/${entityFileName}'} component={${entityAngularName}}/>`)
                     ]
                 }, this);
 
-                const indexReducerPath = `${CLIENT_MAIN_SRC_DIR}app/shared/reducers/index.ts`;
+                const indexReducerPath = `${CLIENT_MAIN_SRC_DIR}app/reducers/index.ts`;
 
                 jhipsterUtils.rewriteFile({
                     file: indexReducerPath,
                     needle: 'jhipster-needle-add-reducer-import',
                     splicable: [
-                        this.stripMargin(`|import ${entityInstance} from 'app/entities/${entityFolderName}/${entityFileName}.reducer';`)
+                        this.stripMargin(`|import ${entityInstance} from '../entities/${entityFolderName}/${entityFileName}.reducer';`)
                     ]
                 }, this);
 
@@ -317,6 +357,9 @@ module.exports = class extends PrivateBase {
     addAdminToModule(appName, adminAngularName, adminFolderName, adminFileName, enableTranslation, clientFramework) {
         const adminModulePath = `${CLIENT_MAIN_SRC_DIR}app/admin/admin.module.ts`;
         try {
+            if (clientFramework === 'angular1') {
+                return;
+            }
             let importStatement = `|import { ${appName}${adminAngularName}Module } from './${adminFolderName}/${adminFileName}.module';`;
             if (importStatement.length > constants.LINE_LENGTH) {
                 importStatement =
@@ -514,6 +557,38 @@ module.exports = class extends PrivateBase {
     }
 
     /**
+     * Add new social configuration in the "application.yml".
+     *
+     * @param {string} name - social name (twitter, facebook, ect.)
+     * @param {string} clientId - clientId
+     * @param {string} clientSecret - clientSecret
+     * @param {string} comment - url of how to configure the social service
+     */
+    addSocialConfiguration(name, clientId, clientSecret, comment) {
+        const fullPath = `${SERVER_MAIN_RES_DIR}config/application.yml`;
+        try {
+            this.log(chalk.yellow('   update ') + fullPath);
+            let config = '';
+            if (comment) {
+                config += `# ${comment}\n        `;
+            }
+            config += `${name}:\n` +
+                `            clientId: ${clientId}\n` +
+                `            clientSecret: ${clientSecret}\n`;
+            jhipsterUtils.rewriteFile({
+                file: fullPath,
+                needle: 'jhipster-needle-add-social-configuration',
+                splicable: [
+                    config
+                ]
+            }, this);
+        } catch (e) {
+            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow('. Reference to ')}social configuration ${name}${chalk.yellow(' not added.\n')}`);
+            this.debug('Error:', e);
+        }
+    }
+
+    /**
      * Add a new dependency in the "bower.json".
      *
      * @param {string} name - dependency name
@@ -651,6 +726,28 @@ module.exports = class extends PrivateBase {
     }
 
     /**
+     * Add a new module to the AngularJS application in "app.module.js".
+     *
+     * @param {string} moduleName - module name
+     *
+     */
+    addAngularJsModule(moduleName) {
+        const fullPath = `${CLIENT_MAIN_SRC_DIR}app/app.module.js`;
+        try {
+            jhipsterUtils.rewriteFile({
+                file: fullPath,
+                needle: 'jhipster-needle-angularjs-add-module',
+                splicable: [
+                    `'${moduleName}',`
+                ]
+            }, this);
+        } catch (e) {
+            this.log(chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ') + moduleName + chalk.yellow(' not added to JHipster app.\n'));
+            this.debug('Error:', e);
+        }
+    }
+
+    /**
      * Add a new module in the TS modules file.
      *
      * @param {string} appName - Angular2 application name.
@@ -663,6 +760,9 @@ module.exports = class extends PrivateBase {
     addAngularModule(appName, angularName, folderName, fileName, enableTranslation, clientFramework) {
         const modulePath = `${CLIENT_MAIN_SRC_DIR}app/app.module.ts`;
         try {
+            if (clientFramework === 'angular1') {
+                return;
+            }
             let importStatement = `|import { ${appName}${angularName}Module } from './${folderName}/${fileName}.module';`;
             if (importStatement.length > constants.LINE_LENGTH) {
                 importStatement =
@@ -867,6 +967,125 @@ module.exports = class extends PrivateBase {
             }, this);
         } catch (e) {
             this.log(chalk.yellow('\nUnable to find ') + filePath + chalk.yellow(' or missing required jhipster-needle. Changeset not added.\n') + e);
+            this.debug('Error:', e);
+        }
+    }
+
+    /**
+     * Add a new social button in the login and register modules
+     *
+     * @param {boolean} isUseSass - flag indicating if sass should be used
+     * @param {string} socialName - name of the social module. ex: 'facebook'
+     * @param {string} socialParameter - parameter to send to social connection ex: 'public_profile,email'
+     * @param {string} buttonColor - color of the social button. ex: '#3b5998'
+     * @param {string} buttonHoverColor - color of the social button when is hover. ex: '#2d4373'
+     * @param {string} clientFramework - The name of the client framework
+     */
+    addSocialButton(isUseSass, socialName, socialParameter, buttonColor, buttonHoverColor, clientFramework) {
+        const socialServicefullPath = `${CLIENT_MAIN_SRC_DIR}app/account/social/social.service.js`;
+        let loginfullPath;
+        let registerfullPath;
+        if (clientFramework === 'angular1') {
+            loginfullPath = `${CLIENT_MAIN_SRC_DIR}app/account/login/login.html`;
+            registerfullPath = `${CLIENT_MAIN_SRC_DIR}app/account/register/register.html`;
+        } else {
+            loginfullPath = `${CLIENT_MAIN_SRC_DIR}app/account/login/login.component.html`;
+            registerfullPath = `${CLIENT_MAIN_SRC_DIR}app/account/register/register.component.html`;
+        }
+        try {
+            this.log(chalk.yellow('\nupdate ') + socialServicefullPath);
+            const serviceCode = `case '${socialName}': return '${socialParameter}';`;
+            jhipsterUtils.rewriteFile({
+                file: socialServicefullPath,
+                needle: 'jhipster-needle-add-social-button',
+                splicable: [
+                    serviceCode
+                ]
+            }, this);
+
+            const buttonCode = `<jh-social ng-provider="${socialName}"></jh-social>`;
+            this.log(chalk.yellow('update ') + loginfullPath);
+            jhipsterUtils.rewriteFile({
+                file: loginfullPath,
+                needle: 'jhipster-needle-add-social-button',
+                splicable: [
+                    buttonCode
+                ]
+            }, this);
+            this.log(chalk.yellow('update ') + registerfullPath);
+            jhipsterUtils.rewriteFile({
+                file: registerfullPath,
+                needle: 'jhipster-needle-add-social-button',
+                splicable: [
+                    buttonCode
+                ]
+            }, this);
+
+            const buttonStyle = `.jh-btn-${socialName} {
+                    background-color: ${buttonColor};
+                    border-color: rgba(0, 0, 0, 0.2);
+                    color: #fff;
+                }\n
+                .jh-btn-${socialName}:hover, .jh-btn-${socialName}:focus, .jh-btn-${socialName}:active, .jh-btn-${socialName}.active, .open > .dropdown-toggle.jh-btn-${socialName} {
+                    background-color: ${buttonHoverColor};
+                    border-color: rgba(0, 0, 0, 0.2);
+                    color: #fff;
+                }`;
+            this.addMainCSSStyle(isUseSass, buttonStyle, `Add sign in style for ${socialName}`);
+        } catch (e) {
+            this.log(chalk.yellow(`\nUnable to add social button modification.\n${e}`));
+            this.debug('Error:', e);
+        }
+    }
+
+    /**
+     * Add a new social connection factory in the SocialConfiguration.java file.
+     *
+     * @param {string} javaDir - default java directory of the project (JHipster const)
+     * @param {string} importPackagePath - package path of the ConnectionFactory class
+     * @param {string} socialName - name of the social module
+     * @param {string} connectionFactoryClassName - name of the ConnectionFactory class
+     * @param {string} configurationName - name of the section in the config yaml file
+     */
+    addSocialConnectionFactory(javaDir, importPackagePath, socialName, connectionFactoryClassName, configurationName) {
+        const fullPath = `${javaDir}config/social/SocialConfiguration.java`;
+        try {
+            this.log(chalk.yellow('\nupdate ') + fullPath);
+            const javaImport = `import ${importPackagePath};\n`;
+            jhipsterUtils.rewriteFile({
+                file: fullPath,
+                needle: 'jhipster-needle-add-social-connection-factory-import-package',
+                splicable: [
+                    javaImport
+                ]
+            }, this);
+
+            const clientId = `${socialName}ClientId`;
+            const clientSecret = `${socialName}ClientSecret`;
+            const javaCode = `// ${socialName} configuration\n` +
+                `        String ${clientId} = environment.getProperty("spring.social.${configurationName}.clientId");\n` +
+                `        String ${clientSecret} = environment.getProperty("spring.social.${configurationName}.clientSecret");\n` +
+                `        if (${clientId} != null && ${clientSecret} != null) {\n` +
+                `            log.debug("Configuring ${connectionFactoryClassName}");\n` +
+                '            connectionFactoryConfigurer.addConnectionFactory(\n' +
+                `                new ${connectionFactoryClassName}(\n` +
+                `                    ${clientId},\n` +
+                `                    ${clientSecret}\n` +
+                '                )\n' +
+                '            );\n' +
+                '        } else {\n' +
+                `            log.error("Cannot configure ${connectionFactoryClassName} id or secret null");\n` +
+                '        }\n';
+
+            jhipsterUtils.rewriteFile({
+                file: fullPath,
+                needle: 'jhipster-needle-add-social-connection-factory',
+                splicable: [
+                    javaCode
+                ]
+            }, this);
+        } catch (e) {
+            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Social connection ') + e} ${chalk.yellow('not added.\n')}`);
             this.debug('Error:', e);
         }
     }
@@ -1077,32 +1296,6 @@ module.exports = class extends PrivateBase {
     }
 
     /**
-     * Add a remote Maven Repository to the Maven build.
-     *
-     * @param {string} id - id of the repository
-     * @param {string} url - url of the repository
-     */
-    addMavenRepository(id, url) {
-        const fullPath = 'pom.xml';
-        try {
-            const repository = `${'<repository>\n' +
-                '            <id>'}${id}</id>\n` +
-                `            <url>${url}</url>\n` +
-                '        </repository>';
-            jhipsterUtils.rewriteFile({
-                file: fullPath,
-                needle: 'jhipster-needle-maven-repository',
-                splicable: [
-                    repository
-                ]
-            }, this);
-        } catch (e) {
-            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ')}maven repository (id: ${id}, url:${url})${chalk.yellow(' not added.\n')}`);
-            this.debug('Error:', e);
-        }
-    }
-
-    /**
      * Add a new Maven property.
      *
      * @param {string} name - property name
@@ -1135,19 +1328,7 @@ module.exports = class extends PrivateBase {
      * @param {string} other - (optional) explicit other thing: scope, exclusions...
      */
     addMavenDependency(groupId, artifactId, version, other) {
-        this.addMavenDependencyInDirectory('.', groupId, artifactId, version, other);
-    }
-
-    /**
-     * Add a new Maven dependency in a specific folder..
-     *
-     * @param {string} directory - the folder to add the dependency in
-     * @param {string} groupId - dependency groupId
-     * @param {string} artifactId - dependency artifactId
-     * @param {string} version - (optional) explicit dependency version number
-     * @param {string} other - (optional) explicit other thing: scope, exclusions...
-     */
-    addMavenDependencyInDirectory(directory, groupId, artifactId, version, other) {
+        const fullPath = 'pom.xml';
         try {
             let dependency = `${'<dependency>\n' +
                 '            <groupId>'}${groupId}</groupId>\n` +
@@ -1160,15 +1341,14 @@ module.exports = class extends PrivateBase {
             }
             dependency += '        </dependency>';
             jhipsterUtils.rewriteFile({
-                path: directory,
-                file: 'pom.xml',
+                file: fullPath,
                 needle: 'jhipster-needle-maven-add-dependency',
                 splicable: [
                     dependency
                 ]
             }, this);
         } catch (e) {
-            this.log(`${chalk.yellow('\nUnable to find ') + directory + chalk.yellow(' or missing required jhipster-needle. Reference to ')}maven dependency (groupId: ${groupId}, artifactId:${artifactId}, version:${version})${chalk.yellow(' not added.\n')}`);
+            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ')}maven dependency (groupId: ${groupId}, artifactId:${artifactId}, version:${version})${chalk.yellow(' not added.\n')}`);
             this.debug('Error:', e);
         }
     }
@@ -1259,28 +1439,6 @@ module.exports = class extends PrivateBase {
     }
 
     /**
-     * Add Gradle plugin to the plugins block
-     *
-     * @param {string} id - plugin id
-     * @param {string} version - explicit plugin version number
-     */
-    addGradlePluginToPluginsBlock(id, version) {
-        const fullPath = 'build.gradle';
-        try {
-            jhipsterUtils.rewriteFile({
-                file: fullPath,
-                needle: 'jhipster-needle-gradle-plugins',
-                splicable: [
-                    `id "${id}" version "${version}"`
-                ]
-            }, this);
-        } catch (e) {
-            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ')}id ${id} version ${version}${chalk.yellow(' not added.\n')}`);
-            this.debug('Error:', e);
-        }
-    }
-
-    /**
      * A new dependency to build.gradle file.
      *
      * @param {string} scope - scope of the new dependency, e.g. compile
@@ -1317,33 +1475,21 @@ module.exports = class extends PrivateBase {
      * @param {string} version - (optional) explicit dependency version number
      */
     addGradleDependency(scope, group, name, version) {
-        this.addGradleDependencyInDirectory('.', scope, group, name, version);
-    }
-
-    /**
-     * A new dependency to build.gradle file in a specific folder.
-     *
-     * @param {string} scope - scope of the new dependency, e.g. compile
-     * @param {string} group - maven GroupId
-     * @param {string} name - maven ArtifactId
-     * @param {string} version - (optional) explicit dependency version number
-     */
-    addGradleDependencyInDirectory(directory, scope, group, name, version) {
+        const fullPath = 'build.gradle';
         let dependency = `${group}:${name}`;
         if (version) {
             dependency += `:${version}`;
         }
         try {
             jhipsterUtils.rewriteFile({
-                path: directory,
-                file: 'build.gradle',
+                file: fullPath,
                 needle: 'jhipster-needle-gradle-dependency',
                 splicable: [
                     `${scope} "${dependency}"`
                 ]
             }, this);
         } catch (e) {
-            this.log(`${chalk.yellow('\nUnable to find ') + directory + chalk.yellow(' or missing required jhipster-needle. Reference to ') + group}:${name}:${version}${chalk.yellow(' not added.\n')}`);
+            this.log(`${chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ') + group}:${name}:${version}${chalk.yellow(' not added.\n')}`);
             this.debug('Error:', e);
         }
     }
@@ -1365,44 +1511,6 @@ module.exports = class extends PrivateBase {
             }, this);
         } catch (e) {
             this.log(chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ') + name + chalk.yellow(' not added.\n'));
-            this.debug('Error:', e);
-        }
-    }
-
-    /**
-     * Add a remote Maven Repository to the Gradle build.
-     *
-     * @param {string} url - url of the repository
-     * @param {string} username - (optional) username of the repository credentials
-     * @param {string} password - (optional) password of the repository credentials
-     */
-    addGradleMavenRepository(url, username, password) {
-        const fullPath = 'build.gradle';
-        try {
-            let repository = 'maven {\n';
-            if (url) {
-                repository += `        url "${url}"\n`;
-            }
-            if (username || password) {
-                repository += '        credentials {\n';
-                if (username) {
-                    repository += `            username = "${username}"\n`;
-                }
-                if (password) {
-                    repository += `            password = "${password}"\n`;
-                }
-                repository += '        }\n';
-            }
-            repository += '    }';
-            jhipsterUtils.rewriteFile({
-                file: fullPath,
-                needle: 'jhipster-needle-gradle-repositories',
-                splicable: [
-                    repository
-                ]
-            }, this);
-        } catch (e) {
-            this.log(chalk.yellow('\nUnable to find ') + fullPath + chalk.yellow(' or missing required jhipster-needle. Reference to ') + url + chalk.yellow(' not added.\n'));
             this.debug('Error:', e);
         }
     }
@@ -1472,17 +1580,6 @@ module.exports = class extends PrivateBase {
 
             jhipsterUtils.copyWebResource(source, dest, regex, 'js', _this, opt, template);
             break;
-        case 'stripJsx':
-            regex = new RegExp([
-                /(import { ?Translate, ?translate ?} from 'react-jhipster';?)/, // Translate imports
-                /(import { ?translate, ?Translate ?} from 'react-jhipster';?)/, // translate imports
-                /( Translate,|, ?Translate|import { ?Translate ?} from 'react-jhipster';?)/, // Translate import
-                /( translate,|, ?translate|import { ?translate ?} from 'react-jhipster';?)/, // translate import
-                /<Translate (component="[a-z]+" )?contentKey="([a-zA-Z0-9.\-_]+)" ?(component="[a-z]+")? ?(interpolate=\{\{[a-zA-Z0-9.: ]+\}\})? ?>|<\/Translate>/, // Translate component tag
-            ].map(r => r.source).join('|'), 'g');
-
-            jhipsterUtils.copyWebResource(source, dest, regex, 'jsx', _this, opt, template);
-            break;
         case 'copy':
             _this.copy(source, dest);
             break;
@@ -1527,7 +1624,7 @@ module.exports = class extends PrivateBase {
      * @param {boolean} template - flag to use template method instead of copy
      */
     processJsx(source, dest, generator, opt, template) {
-        this.copyTemplate(source, dest, 'stripJsx', generator, opt, template);
+        this.copyTemplate(source, dest, 'stripJs', generator, opt, template);
     }
 
     /**
@@ -1710,16 +1807,16 @@ module.exports = class extends PrivateBase {
      * @param {string} microserviceName
      */
     getMicroserviceAppName(microserviceName) {
-        return _.camelCase(microserviceName) + (microserviceName.endsWith('App') ? '' : 'App');
+        return _.camelCase(microserviceName, true) + (microserviceName.endsWith('App') ? '' : 'App');
     }
 
     /**
      * Load an entity configuration file into context.
      */
-    loadEntityJson(fromPath = this.context.fromPath) {
+    loadEntityJson() {
         const context = this.context;
         try {
-            context.fileData = this.fs.readJSON(fromPath);
+            context.fileData = this.fs.readJSON(context.fromPath);
         } catch (err) {
             this.debug('Error:', err);
             this.error(chalk.red('\nThe entity configuration file could not be read!\n'));
@@ -1736,13 +1833,11 @@ module.exports = class extends PrivateBase {
         context.dto = context.fileData.dto;
         context.service = context.fileData.service;
         context.fluentMethods = context.fileData.fluentMethods;
-        context.clientRootFolder = context.fileData.clientRootFolder;
         context.pagination = context.fileData.pagination;
-        context.searchEngine = _.isUndefined(context.fileData.searchEngine) ? context.searchEngine : context.fileData.searchEngine;
+        context.searchEngine = context.fileData.searchEngine || context.searchEngine;
         context.javadoc = context.fileData.javadoc;
         context.entityTableName = context.fileData.entityTableName;
         context.jhiPrefix = context.fileData.jhiPrefix || context.jhiPrefix;
-        context.skipCheckLengthOfIdentifier = context.fileData.skipCheckLengthOfIdentifier || context.skipCheckLengthOfIdentifier;
         context.jhiTablePrefix = this.getTableName(context.jhiPrefix);
         this.copyFilteringFlag(context.fileData, context, context);
         if (_.isUndefined(context.entityTableName)) {
@@ -1781,11 +1876,7 @@ module.exports = class extends PrivateBase {
         let entityJson = null;
 
         try {
-            if (this.context.microservicePath) {
-                entityJson = this.fs.readJSON(path.join(this.context.microservicePath, JHIPSTER_CONFIG_DIR, `${_.upperFirst(file)}.json`));
-            } else {
-                entityJson = this.fs.readJSON(path.join(JHIPSTER_CONFIG_DIR, `${_.upperFirst(file)}.json`));
-            }
+            entityJson = this.fs.readJSON(path.join(JHIPSTER_CONFIG_DIR, `${_.upperFirst(file)}.json`));
         } catch (err) {
             this.log(chalk.red(`The JHipster entity configuration file could not be read for file ${file}!`) + err);
             this.debug('Error:', err);
@@ -1911,11 +2002,11 @@ module.exports = class extends PrivateBase {
     getJoinTableName(entityName, relationshipName, prodDatabaseType) {
         const joinTableName = `${this.getTableName(entityName)}_${this.getTableName(relationshipName)}`;
         let limit = 0;
-        if (prodDatabaseType === 'oracle' && joinTableName.length > 30 && !this.skipCheckLengthOfIdentifier) {
+        if (prodDatabaseType === 'oracle' && joinTableName.length > 30) {
             this.warning(`The generated join table "${joinTableName}" is too long for Oracle (which has a 30 characters limit). It will be truncated!`);
 
             limit = 30;
-        } else if (prodDatabaseType === 'mysql' && joinTableName.length > 64 && !this.skipCheckLengthOfIdentifier) {
+        } else if (prodDatabaseType === 'mysql' && joinTableName.length > 64) {
             this.warning(`The generated join table "${joinTableName}" is too long for MySQL (which has a 64 characters limit). It will be truncated!`);
 
             limit = 64;
@@ -1946,11 +2037,11 @@ module.exports = class extends PrivateBase {
         }
         let limit = 0;
 
-        if (prodDatabaseType === 'oracle' && constraintName.length > 30 && !this.skipCheckLengthOfIdentifier) {
+        if (prodDatabaseType === 'oracle' && constraintName.length > 30) {
             this.warning(`The generated constraint name "${constraintName}" is too long for Oracle (which has a 30 characters limit). It will be truncated!`);
 
             limit = 28;
-        } else if (prodDatabaseType === 'mysql' && constraintName.length > 64 && !this.skipCheckLengthOfIdentifier) {
+        } else if (prodDatabaseType === 'mysql' && constraintName.length > 64) {
             this.warning(`The generated constraint name "${constraintName}" is too long for MySQL (which has a 64 characters limit). It will be truncated!`);
 
             limit = 62;
@@ -2048,11 +2139,11 @@ module.exports = class extends PrivateBase {
         this.log(`${chalk.green('  ██╗   ██║')}${chalk.red(' ██╔═══██║    ██║    ██╔════╝   ╚═══██╗    ██║    ██╔═══╝   ██╔══██║')}`);
         this.log(`${chalk.green('  ╚██████╔╝')}${chalk.red(' ██║   ██║ ████████╗ ██║       ██████╔╝    ██║    ████████╗ ██║  ╚██╗')}`);
         this.log(`${chalk.green('   ╚═════╝ ')}${chalk.red(' ╚═╝   ╚═╝ ╚═══════╝ ╚═╝       ╚═════╝     ╚═╝    ╚═══════╝ ╚═╝   ╚═╝')}\n`);
-        this.log(chalk.white.bold('                            https://www.jhipster.tech\n'));
+        this.log(chalk.white.bold('                            http://www.jhipster.tech\n'));
         this.log(chalk.white('Welcome to the JHipster Generator ') + chalk.yellow(`v${packagejs.version}`));
         this.log(chalk.green(' _______________________________________________________________________________________________________________\n'));
         this.log(chalk.white(`  If you find JHipster useful consider supporting our collective ${chalk.yellow('https://opencollective.com/generator-jhipster')}`));
-        this.log(chalk.white(`  Documentation for creating an application: ${chalk.yellow('https://www.jhipster.tech/creating-an-app/')}`));
+        this.log(chalk.white(`  Documentation for creating an application: ${chalk.yellow('http://www.jhipster.tech/creating-an-app/')}`));
         this.log(chalk.green(' _______________________________________________________________________________________________________________\n'));
         this.log(chalk.white(`Application files will be generated in folder: ${chalk.yellow(process.cwd())}`));
     }
@@ -2087,8 +2178,14 @@ module.exports = class extends PrivateBase {
      * @param {string} baseName of application
      */
     getAngularAppName(baseName = this.baseName) {
-        const name = _.camelCase(baseName) + (baseName.endsWith('App') ? '' : 'App');
-        return name.match(/^\d/) ? 'App' : name;
+        return _.camelCase(baseName, true) + (baseName.endsWith('App') ? '' : 'App');
+    }
+
+    /**
+     * get the Angular 2+ application name.
+     */
+    getAngular2AppName() {
+        return this.getAngularXAppName();
     }
 
     /**
@@ -2096,16 +2193,7 @@ module.exports = class extends PrivateBase {
      * @param {string} baseName of application
      */
     getAngularXAppName(baseName = this.baseName) {
-        const name = this.upperFirstCamelCase(baseName);
-        return name.match(/^\d/) ? 'App' : name;
-    }
-
-    /**
-     * get the an upperFirst camelCase value.
-     * @param {string} value string to convert
-     */
-    upperFirstCamelCase(value) {
-        return _.upperFirst(_.camelCase(value));
+        return _.upperFirst(_.camelCase(baseName, true));
     }
 
     /**
@@ -2113,7 +2201,7 @@ module.exports = class extends PrivateBase {
      * @param {string} baseName of application
      */
     getMainClassName(baseName = this.baseName) {
-        const main = _.upperFirst(this.getMicroserviceAppName(baseName));
+        const main = _.upperFirst(this.getAngularAppName(baseName));
         const acceptableForJava = new RegExp('^[A-Z][a-zA-Z0-9_]*$');
 
         return acceptableForJava.test(main) ? main : 'Application';
@@ -2237,7 +2325,7 @@ module.exports = class extends PrivateBase {
         let buildCmd = 'mvnw verify -DskipTests=true -B';
 
         if (buildTool === 'gradle') {
-            buildCmd = 'gradlew bootWar -x test';
+            buildCmd = 'gradlew bootRepackage -x test';
         }
 
         if (os.platform() !== 'win32') {
@@ -2268,7 +2356,7 @@ module.exports = class extends PrivateBase {
             for (let j = 0, blockTemplates = files[blocks[i]]; j < blockTemplates.length; j++) {
                 const blockTemplate = blockTemplates[j];
                 if (!blockTemplate.condition || blockTemplate.condition(_this)) {
-                    const path = blockTemplate.path || '';
+                    const path = blockTemplate.path ? blockTemplate.path : '';
                     blockTemplate.templates.forEach((templateObj) => {
                         let templatePath = path;
                         let method = 'template';
@@ -2278,11 +2366,7 @@ module.exports = class extends PrivateBase {
                         if (typeof templateObj === 'string') {
                             templatePath += templateObj;
                         } else {
-                            if (typeof templateObj.file === 'string') {
-                                templatePath += templateObj.file;
-                            } else if (typeof templateObj.file === 'function') {
-                                templatePath += templateObj.file(_this);
-                            }
+                            templatePath += templateObj.file;
                             method = templateObj.method ? templateObj.method : method;
                             useTemplate = templateObj.template ? templateObj.template : useTemplate;
                             options = templateObj.options ? templateObj.options : options;
@@ -2291,18 +2375,10 @@ module.exports = class extends PrivateBase {
                             templatePathTo = path + templateObj.renameTo(_this);
                         } else {
                             templatePathTo = templatePath.replace(/([/])_|^_/, '$1');
-                            templatePathTo = templatePath.replace('.ejs', '');
                         }
                         filesOut.push(templatePathTo);
                         if (!returnFiles) {
-                            let templatePathFrom = prefix ? `${prefix}/${templatePath}` : templatePath;
-                            if (
-                                !templateObj.noEjs && !templatePathFrom.endsWith('.png')
-                                && !templatePathFrom.endsWith('.jpg') && !templatePathFrom.endsWith('.gif')
-                                && !templatePathFrom.endsWith('.svg') && !templatePathFrom.endsWith('.ico')
-                            ) {
-                                templatePathFrom = `${templatePathFrom}.ejs`;
-                            }
+                            const templatePathFrom = prefix ? `${prefix}/${templatePath}` : templatePath;
                             // if (method === 'template')
                             _this[method](templatePathFrom, templatePathTo, _this, options, useTemplate);
                         }
@@ -2316,86 +2392,75 @@ module.exports = class extends PrivateBase {
 
     /**
      * Setup client instance level options from context.
-     * all variables should be set to dest,
-     * all variables should be referred from context,
-     * all methods should be called on generator,
      * @param {any} generator - generator instance
      * @param {any} context - context to use default is generator instance
-     * @param {any} dest - destination context to use default is context
      */
-    setupClientOptions(generator, context = generator, dest = context) {
-        dest.skipServer = context.configOptions.skipServer || context.config.get('skipServer');
-        dest.skipUserManagement = context.configOptions.skipUserManagement || context.options['skip-user-management'] || context.config.get('skipUserManagement');
-        dest.skipCommitHook = context.options['skip-commit-hook'] || context.config.get('skipCommitHook');
-        dest.authenticationType = context.options.auth || context.configOptions.authenticationType || context.config.get('authenticationType');
-        if (dest.authenticationType === 'oauth2') {
-            dest.skipUserManagement = true;
+    setupClientOptions(generator, context = generator) {
+        generator.skipServer = context.configOptions.skipServer || context.config.get('skipServer');
+        generator.skipUserManagement = context.configOptions.skipUserManagement || context.options['skip-user-management'] || context.config.get('skipUserManagement');
+        generator.authenticationType = context.options.auth || context.configOptions.authenticationType || context.config.get('authenticationType');
+        if (generator.authenticationType === 'oauth2') {
+            generator.skipUserManagement = true;
         }
         const uaaBaseName = context.options.uaaBaseName || context.configOptions.uaaBaseName || context.options['uaa-base-name'] || context.config.get('uaaBaseName');
         if (context.options.auth === 'uaa' && _.isNil(uaaBaseName)) {
             generator.error('when using --auth uaa, a UAA basename must be provided with --uaa-base-name');
         }
-        dest.uaaBaseName = uaaBaseName;
+        generator.uaaBaseName = uaaBaseName;
 
-        dest.buildTool = context.options.build;
-        dest.websocket = context.options.websocket;
-        dest.devDatabaseType = context.options.db || context.configOptions.devDatabaseType || context.config.get('devDatabaseType');
-        dest.prodDatabaseType = context.options.db || context.configOptions.prodDatabaseType || context.config.get('prodDatabaseType');
-        dest.databaseType = generator.getDBTypeFromDBValue(context.options.db) || context.configOptions.databaseType || context.config.get('databaseType');
-        dest.searchEngine = context.options['search-engine'] || context.config.get('searchEngine');
-        dest.cacheProvider = context.options['cache-provider'] || context.config.get('cacheProvider') || context.config.get('hibernateCache') || 'no';
-        dest.enableHibernateCache = context.options['hb-cache'] || context.config.get('enableHibernateCache') || (context.config.get('hibernateCache') !== undefined && context.config.get('hibernateCache') !== 'no');
-        dest.otherModules = context.configOptions.otherModules || [];
-        dest.jhiPrefix = context.configOptions.jhiPrefix || context.config.get('jhiPrefix') || context.options['jhi-prefix'];
-        dest.jhiPrefixCapitalized = _.upperFirst(generator.jhiPrefix);
-        dest.jhiPrefixDashed = _.kebabCase(generator.jhiPrefix);
-        dest.testFrameworks = [];
+        generator.buildTool = context.options.build;
+        generator.websocket = context.options.websocket;
+        generator.devDatabaseType = context.options.db || context.configOptions.devDatabaseType || context.config.get('devDatabaseType');
+        generator.prodDatabaseType = context.options.db || context.configOptions.prodDatabaseType || context.config.get('prodDatabaseType');
+        generator.databaseType = generator.getDBTypeFromDBValue(context.options.db) || context.configOptions.databaseType || context.config.get('databaseType');
+        generator.enableSocialSignIn = context.options.social || context.config.get('enableSocialSignIn');
+        generator.searchEngine = context.options['search-engine'] || context.config.get('searchEngine');
+        generator.cacheProvider = context.options['cache-provider'] || context.config.get('cacheProvider') || context.config.get('hibernateCache') || 'no';
+        generator.enableHibernateCache = context.options['hb-cache'] || context.config.get('enableHibernateCache') || (context.config.get('hibernateCache') !== undefined && context.config.get('hibernateCache') !== 'no');
+        generator.otherModules = context.configOptions.otherModules || [];
+        generator.jhiPrefix = context.configOptions.jhiPrefix || context.config.get('jhiPrefix') || context.options['jhi-prefix'];
+        generator.jhiPrefixCapitalized = _.upperFirst(generator.jhiPrefix);
+        generator.jhiPrefixDashed = _.kebabCase(generator.jhiPrefix);
+        generator.testFrameworks = [];
 
-        if (context.options.protractor) dest.testFrameworks.push('protractor');
+        if (context.options.protractor) generator.testFrameworks.push('protractor');
 
-        dest.baseName = context.configOptions.baseName;
-        dest.logo = context.configOptions.logo;
-        dest.useYarn = context.configOptions.useYarn = !context.options.npm;
-        dest.clientPackageManager = context.configOptions.clientPackageManager;
-        dest.isDebugEnabled = context.configOptions.isDebugEnabled || context.options.debug;
-        dest.experimental = context.configOptions.experimental || context.options.experimental;
+        generator.baseName = context.configOptions.baseName;
+        generator.logo = context.configOptions.logo;
+        generator.useYarn = context.configOptions.useYarn = !context.options.npm;
+        generator.clientPackageManager = context.configOptions.clientPackageManager;
+        generator.isDebugEnabled = context.configOptions.isDebugEnabled || context.options.debug;
+        generator.experimental = context.configOptions.experimental || context.options.experimental;
     }
 
     /**
      * Setup Server instance level options from context.
-     * all variables should be set to dest,
-     * all variables should be referred from context,
-     * all methods should be called on generator,
      * @param {any} generator - generator instance
      * @param {any} context - context to use default is generator instance
-     * @param {any} dest - destination context to use default is context
      */
-    setupServerOptions(generator, context = generator, dest = context) {
-        dest.skipClient = !context.options['client-hook'] || context.configOptions.skipClient || context.config.get('skipClient');
-        dest.skipUserManagement = context.configOptions.skipUserManagement || context.options['skip-user-management'] || context.config.get('skipUserManagement');
-        dest.enableTranslation = context.options.i18n || context.configOptions.enableTranslation || context.config.get('enableTranslation');
-        dest.testFrameworks = [];
+    setupServerOptions(generator, context = generator) {
+        generator.skipClient = !context.options['client-hook'] || context.configOptions.skipClient || context.config.get('skipClient');
+        generator.skipUserManagement = context.configOptions.skipUserManagement || context.options['skip-user-management'] || context.config.get('skipUserManagement');
+        generator.enableTranslation = context.options.i18n || context.configOptions.enableTranslation || context.config.get('enableTranslation');
+        generator.testFrameworks = [];
 
-        if (context.options.gatling) dest.testFrameworks.push('gatling');
-        if (context.options.cucumber) dest.testFrameworks.push('cucumber');
+        if (context.options.gatling) generator.testFrameworks.push('gatling');
+        if (context.options.cucumber) generator.testFrameworks.push('cucumber');
 
-        dest.logo = context.configOptions.logo;
-        dest.baseName = context.configOptions.baseName;
-        dest.clientPackageManager = context.configOptions.clientPackageManager;
-        dest.isDebugEnabled = context.configOptions.isDebugEnabled || context.options.debug;
-        dest.experimental = context.configOptions.experimental || context.options.experimental;
+        generator.logo = context.configOptions.logo;
+        generator.baseName = context.configOptions.baseName;
+        generator.clientPackageManager = context.configOptions.clientPackageManager;
+        generator.isDebugEnabled = context.configOptions.isDebugEnabled || context.options.debug;
+        generator.experimental = context.configOptions.experimental || context.options.experimental;
     }
 
     /**
      * Setup Entity instance level options from context.
-     * all variables should be set to dest,
-     * all variables should be referred from context,
-     * all methods should be called on generator,
      * @param {any} generator - generator instance
      * @param {any} context - context to use default is generator instance
-     * @param {any} dest - destination context to use default is context
+     * @param {any} dest - destination context to use default is generator instance
      */
-    setupEntityOptions(generator, context = generator, dest = context) {
+    setupEntityOptions(generator, context = generator, dest = generator) {
         dest.name = context.options.name;
         // remove extension if feeding json files
         if (dest.name !== undefined) {
@@ -2404,14 +2469,11 @@ module.exports = class extends PrivateBase {
 
         dest.regenerate = context.options.regenerate;
         dest.fluentMethods = context.options['fluent-methods'];
-        dest.skipCheckLengthOfIdentifier = context.options['skip-check-length-of-identifier'];
         dest.entityTableName = generator.getTableName(context.options['table-name'] || dest.name);
         dest.entityNameCapitalized = _.upperFirst(dest.name);
         dest.entityAngularJSSuffix = context.options['angular-suffix'];
-        dest.skipUiGrouping = context.options['skip-ui-grouping'];
-        dest.clientRootFolder = context.options['skip-ui-grouping'] ? '' : context.options['client-root-folder'];
         dest.isDebugEnabled = context.options.debug;
-        dest.experimental = context.options.experimental;
+        generator.experimental = context.options.experimental;
         if (dest.entityAngularJSSuffix && !dest.entityAngularJSSuffix.startsWith('-')) {
             dest.entityAngularJSSuffix = `-${dest.entityAngularJSSuffix}`;
         }
