@@ -39,6 +39,8 @@ _%>
             const fieldNameHumanized = fields[idx].fieldNameHumanized;
             const fieldType = fields[idx].fieldType;
             const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
+            const isSaveUrl = fields[idx].isSaveUrl;
+
             let fieldInputType = 'text';
             let ngModelOption = '';
             const translationKey = keyPrefix + fieldName;
@@ -50,7 +52,7 @@ _%>
                 fieldInputType = 'datetime-local';
             } else if (fieldType === 'Boolean') {
                 fieldInputType = 'checkbox';
-            } else if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') {
+            } else if (isSaveUrl === true && fieldTypeBlobContent !== 'text') {
                 fieldInputType = 'hidden';
             }
         _%>
@@ -66,28 +68,28 @@ _%>
                 <%_ } _%>
             </select>
             <%_ } else { _%>
-            <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+            <%_ if (isSaveUrl === true && fieldTypeBlobContent !== 'text') { _%>
             <div>
                 <%_ if (fieldTypeBlobContent === 'image') { _%>
-                <img [src]="'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>" style="max-height: 100px;" *ngIf="<%= entityInstance %>.<%= fieldName %>" alt="<%=entityInstance %> image"/>
+                <img [src]="'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>Base64Data" style="max-height: 100px;" *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data" alt="<%=entityInstance %> image"/>
                 <%_ } _%>
-                <div *ngIf="<%= entityInstance %>.<%= fieldName %>" class="form-text text-danger clearfix">
+                <div *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data" class="form-text text-danger clearfix">
                     <%_ if (fieldTypeBlobContent === 'any') { _%>
-                    <a class="pull-left" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>)" jhiTranslate="entity.action.open">open</a><br>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+                    <a class="pull-left" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Base64Data)" jhiTranslate="entity.action.open">open</a><br>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data)}}</span>
                     <%_ } else { _%>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}</span>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data)}}</span>
                     <%_ } _%>
                     <%_ if (fieldTypeBlobContent === 'image') { _%>
-                    <button type="button" (click)="clearInputImage('<%= fieldName %>', '<%= fieldName %>ContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">
+                    <button type="button" (click)="clearInputImage('<%= fieldName %>Base64Data', '<%= fieldName %>ContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">
                     <%_ } else { _%>
-                    <button type="button" (click)="<%= entityInstance %>.<%= fieldName %>=null;<%= entityInstance %>.<%= fieldName %>ContentType=null;"
+                    <button type="button" (click)="<%= entityInstance %>.<%= fieldName %>Base64Data=null;<%= entityInstance %>.<%= fieldName %>ContentType=null;"
                             class="btn btn-secondary btn-xs pull-right">
                     <%_ } _%>
                         <span class="fa fa-times"></span>
                     </button>
                 </div>
-                <input type="file" id="file_<%= fieldName %>" (change)="setFileData($event, <%= entityInstance %>, '<%= fieldName %>', <% if (fieldTypeBlobContent === 'image') { %>true)" accept="image/*" jhiTranslate="entity.action.addimage"<% } else { %>false)" jhiTranslate="entity.action.addblob"<% } %>/>
+                <input type="file" id="file_<%= fieldName %>Base64Data" (change)="setFileData($event, <%= entityInstance %>, '<%= fieldName %>', <% if (fieldTypeBlobContent === 'image') { %>true)" accept="image/*" jhiTranslate="entity.action.addimage"<% } else { %>false)" jhiTranslate="entity.action.addblob"<% } %>/>
             </div>
             <%_ } _%>
             <%_ if (fieldType === 'LocalDate') { _%>
@@ -107,9 +109,9 @@ _%>
             <textarea class="form-control" name="<%= fieldName %>" id="field_<%= fieldName %>"
                 [(ngModel)]="<%= entityInstance %>.<%= fieldName %>" <%- include ng_validators %>></textarea>
             <%_ } else { _%>
-            <input type="<%= fieldInputType %>" class="form-control" name="<%= fieldName %>" id="field_<%= fieldName %>"
-                [(ngModel)]="<%= entityInstance %>.<%= fieldName %>" <%- include ng_validators %>/>
-                <%_ if (['byte[]', 'ByteBuffer'].includes(fieldType) && fieldTypeBlobContent !== 'text') { _%>
+            <input type="<%= fieldInputType %>" class="form-control" name="<%= fieldName %>Base64Data" id="field_<%= fieldName %>Base64Data"
+                [(ngModel)]="<%= entityInstance %>.<%= fieldName %>Base64Data" <%- include ng_validators %>/>
+                <%_ if (isSaveUrl && fieldTypeBlobContent !== 'text') { _%>
             <input type="hidden" class="form-control" name="<%= fieldName %>ContentType" id="field_<%= fieldName %>ContentType"
                 [(ngModel)]="<%= entityInstance %>.<%= fieldName %>ContentType" />
                 <%_ } _%>

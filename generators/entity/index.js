@@ -529,7 +529,7 @@ module.exports = class extends BaseGenerator {
                         context.fieldsContainLocalDate = true;
                     } else if (fieldType === 'BigDecimal') {
                         context.fieldsContainBigDecimal = true;
-                    } else if (fieldType === 'byte[]' || fieldType === 'ByteBuffer') {
+                    } else if (field.isSaveUrl === true || fieldType === 'ByteBuffer') {
                         context.fieldsContainBlob = true;
                         if (field.fieldTypeBlobContent === 'image') {
                             context.fieldsContainImageBlob = true;

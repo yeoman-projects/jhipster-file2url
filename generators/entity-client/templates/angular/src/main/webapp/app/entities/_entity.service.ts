@@ -25,7 +25,7 @@ _%>
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
-import { SERVER_API_URL } from '../../app.constants';
+import { SERVER_API_URL, FILE_UPLOAD_URL } from '../../app.constants';
 <%_ if (hasDate) { _%>
 
 import { JhiDateUtils } from 'ng-jhipster';
@@ -36,14 +36,24 @@ import { createRequestOption } from '../../shared';
 
 export type EntityResponseType = HttpResponse<<%= entityAngularName %>>;
 
+
+class fileCallback {
+    constructor(
+        public fileUrl?: string,
+        public fileName?: string,
+        public extensionName?: string
+    ){}
+}
+
 @Injectable()
 export class <%= entityAngularName %>Service {
 
+    private fileUploadUrl = FILE_UPLOAD_URL;
     private resourceUrl =  SERVER_API_URL + '<% if (applicationType === 'gateway' && locals.microserviceName) { %><%= microserviceName.toLowerCase() %>/<% } %>api/<%= entityApiUrl %>';
     <%_ if(searchEngine === 'elasticsearch') { _%>
     private resourceSearchUrl = SERVER_API_URL + '<% if (applicationType === 'gateway' && locals.microserviceName) { %><%= microserviceName.toLowerCase() %>/<% } %>api/_search/<%= entityApiUrl %>';
     <%_ } _%>
-
+    
     constructor(private http: HttpClient<% if (hasDate) { %>, private dateUtils: JhiDateUtils<% } %>) { }
     <%_ if (entityAngularName.length <= 30) { _%>
 
@@ -54,6 +64,17 @@ export class <%= entityAngularName %>Service {
         Observable<EntityResponseType> {
     <%_ } _%>
         const copy = this.convert(<%= entityInstance %>);
+
+        const formData = new FormData();
+        formData.append('file', copy.imageFile.files[0]);
+        return this.http.post(this.fileUploadUrl, formData).concatMap((fileCallback: CallbackFileModel) => {
+            copy.<> = '';
+            copy.imageExampleContentType = '';
+            copy.fileUrl = fileCallback.fileUrl;
+            copy.filename = fileCallback.fileName;
+            return this.http.post<MyFile>(this.resourceUrl, copy, { observe: 'response' });
+        })
+
         return this.http.post<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' })
             .map((res: EntityResponseType) => this.convertResponse(res));
     }

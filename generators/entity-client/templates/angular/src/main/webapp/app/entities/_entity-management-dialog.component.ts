@@ -120,6 +120,10 @@ export class <%= entityAngularName %>DialogComponent implements OnInit {
     }
 
     setFileData(event, entity, field, isImage) {
+        this.<%= entityInstance %>[field + 'FileSource'] = event.target;
+        this.<%= entityInstance %>[field + 'ContentType'] = event.target.files[0].type;
+        this.<%= entityInstance %>[field] = event.target.files[0].name;
+        field = field + 'Base64Data';
         this.dataUtils.setFileData(event, entity, field, isImage);
     }
 

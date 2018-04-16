@@ -27,6 +27,9 @@ if (pkType === 'String') {
     tsKeyType = 'number';
 }
 variables['id'] = 'id?: ' + tsKeyType;
+
+
+
 fields.forEach(field => {
     const fieldType = field.fieldType;
     const fieldName = field.fieldName;
@@ -38,12 +41,15 @@ fields.forEach(field => {
         defaultVariablesValues[fieldName] = 'this.' + fieldName + ' = false;';
     } else if (['Integer', 'Long', 'Float', 'Double', 'BigDecimal'].includes(fieldType)) {
         tsType = 'number';
-    } else if (fieldType === 'String'  || fieldType === 'UUID') {
+    } else if (field.isSaveUrl === false && (fieldType === 'String'  || fieldType === 'UUID')) {
         tsType = 'string';
     } else { //(fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'any' || (fieldType === 'byte[]' || fieldType === 'ByteBuffer') && fieldTypeBlobContent === 'image' || fieldType === 'LocalDate'
         tsType = 'any';
-        if (['byte[]', 'ByteBuffer'].includes(fieldType) && field.fieldTypeBlobContent !== 'text') {
+        if (field.isSaveUrl === true && field.fieldTypeBlobContent !== 'text') {
+            variables[fieldName + 'Url'] = fieldName + 'Url?: ' + 'string';
             variables[fieldName + 'ContentType'] = fieldName + 'ContentType?: ' + 'string';
+            variables[fieldName + 'Base64Data'] = fieldName + 'Base64Data?: ' + 'any';
+            variables[fieldName + 'FileSource'] = fieldName + 'FileSource?: ' + 'any';
         }
     }
     variables[fieldName] = fieldName + '?: ' + tsType;
