@@ -1,0 +1,1 @@
+# jhipster-file2url
