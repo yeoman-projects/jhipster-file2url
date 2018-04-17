@@ -54,7 +54,6 @@ export class <%= entityAngularName %>Service {
     <%_ if(searchEngine === 'elasticsearch') { _%>
     private resourceSearchUrl = SERVER_API_URL + '<% if (applicationType === 'gateway' && locals.microserviceName) { %><%= microserviceName.toLowerCase() %>/<% } %>api/_search/<%= entityApiUrl %>';
     <%_ } _%>
-    
     constructor(private http: HttpClient<% if (hasDate) { %>, private dateUtils: JhiDateUtils<% } %>) { }
     <%_ if (entityAngularName.length <= 30) { _%>
 
@@ -69,7 +68,7 @@ export class <%= entityAngularName %>Service {
         let idx = 0;
         for (const key in copy) {
             const entityFileName = key.substring(0, key.indexOf('FileSource'));
-            if ((key.includes('FileSource'))) {
+            if (key.includes('FileSource') && copy[key]) {
                 const formData = new FormData();
                 if (copy[key] && copy[key].files) {
                     formData.append('file', copy[key].files[0]);
@@ -81,6 +80,10 @@ export class <%= entityAngularName %>Service {
                 copy[key] = '';
             }
 
+        }
+        if (filePostArr.length <= 0) {
+            return this.http.post<Test1>(this.resourceUrl, copy, { observe: 'response' })
+                .map((res: EntityResponseType) => this.convertResponse(res));
         }
         return forkJoin(...filePostArr).concatMap((results: FileCallbackModel[]) => {
             results.forEach((element: FileCallbackModel) => {
@@ -99,8 +102,39 @@ export class <%= entityAngularName %>Service {
         Observable<EntityResponseType> {
     <%_ } _%>
         const copy = this.convert(<%= entityInstance %>);
-        return this.http.put<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' })
-            .map((res: EntityResponseType) => this.convertResponse(res));
+
+        const filePostArr = [];
+        let idx = 0;
+        const reg = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
+        for (const key in copy) {
+            const entityFileName = key.substring(0, key.indexOf('FileSource'));
+            if (key.includes('FileSource') && copy[key]) {
+                const formData = new FormData();
+                if (copy[key] && copy[key].files) {
+                    formData.append('file', copy[key].files[0]);
+                    formData.append('key', entityFileName);
+                    filePostArr[idx++] = this.http.post(this.fileUploadUrl, formData);
+                }
+            }
+            if (key.includes('Base64Data')) {
+                copy[key] = '';
+            }
+            if (key.includes('Url') && copy[key]) {
+                const exec = reg.exec(copy[key]);
+                copy[key] = exec[5];
+            }
+        }
+        if (filePostArr.length <= 0) {
+            return this.http.put<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' })
+                .map((res: EntityResponseType) => this.convertResponse(res));
+        }
+        return forkJoin(...filePostArr).concatMap((results: FileCallbackModel[]) => {
+            results.forEach((element: FileCallbackModel) => {
+                copy[element.key] = element.fileName;
+                copy[element.key + 'Url'] = element.fileUrl;
+            });
+            return this.http.put<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' });
+        }).map((res: EntityResponseType) => this.convertResponse(res));
     }
 
     find(id: <% if (pkType === 'String') { %>string<% } else { %>number<% } %>): Observable<EntityResponseType> {
@@ -155,11 +189,11 @@ export class <%= entityAngularName %>Service {
             .convertDateTimeFromServer(<%= entityInstance %>.<%=fields[idx].fieldName%>);
             <%_ } _%>
         <%_ } _%>
-        for (const key in copy) {                         
-            if (key.includes('Url')) {
+        for (const key in copy) {
+            if (key.includes('Url') && copy[key]) {
                copy[key] = STATIC_SERVER_URL + '/' + copy[key];
             }
-        }                                                  
+        }
         return copy;
     }
 

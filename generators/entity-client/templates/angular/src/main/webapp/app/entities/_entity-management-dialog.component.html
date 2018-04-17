@@ -71,19 +71,19 @@ _%>
             <%_ if (isSaveUrl === true && fieldTypeBlobContent !== 'text') { _%>
             <div>
                 <%_ if (fieldTypeBlobContent === 'image') { _%>
-                <img [src]="'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>Base64Data" style="max-height: 100px;" *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data" alt="<%=entityInstance %> image"/>
+                <img [src]=" <%=entityInstance %>.<%=fieldName%>Base64Data ? 'data:' + <%=entityInstance %>.<%=fieldName%>ContentType + ';base64,' + <%=entityInstance %>.<%=fieldName%>Base64Data : <%=entityInstance %>.<%=fieldName%>Url" style="max-height: 100px;" *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url" alt="<%=entityInstance %> image"/>
                 <%_ } _%>
-                <div *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data" class="form-text text-danger clearfix">
+                <div *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data || <%=entityInstance %>.<%=fieldName%>Url" class="form-text text-danger clearfix">
                     <%_ if (fieldTypeBlobContent === 'any') { _%>
-                    <a class="pull-left" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Base64Data)" jhiTranslate="entity.action.open">open</a><br>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data)}}</span>
+                    <a class="pull-left" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url)" jhiTranslate="entity.action.open">open</a><br>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url )}}</span>
                     <%_ } else { _%>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data)}}</span>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url)}}</span>
                     <%_ } _%>
                     <%_ if (fieldTypeBlobContent === 'image') { _%>
-                    <button type="button" (click)="clearInputImage('<%= fieldName %>Base64Data', '<%= fieldName %>ContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">
+                    <button type="button" (click)="clearInputImage( <%=fieldName %>Base64Data ? '<%= fieldName %>Base64Data' : '<%= fieldName %>Url', '<%= fieldName %>ContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">
                     <%_ } else { _%>
-                    <button type="button" (click)="<%= entityInstance %>.<%= fieldName %>Base64Data=null;<%= entityInstance %>.<%= fieldName %>ContentType=null;"
+                    <button type="button" (click)="<%= entityInstance %>.<%= fieldName %>Base64Data=null;<%= entityInstance %>.<%= fieldName %>ContentType=null;<%= entityInstance %>.<%= fieldName %>Url=null;"
                             class="btn btn-secondary btn-xs pull-right">
                     <%_ } _%>
                         <span class="fa fa-times"></span>
