@@ -26,7 +26,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { forkJoin } from 'rxjs/observable/forkJoin';
-import { SERVER_API_URL, FILE_UPLOAD_URL } from '../../app.constants';
+import { SERVER_API_URL, FILE_UPLOAD_URL, STATIC_SERVER_URL } from '../../app.constants';
 <%_ if (hasDate) { _%>
 
 import { JhiDateUtils } from 'ng-jhipster';
@@ -65,7 +65,6 @@ export class <%= entityAngularName %>Service {
         Observable<EntityResponseType> {
     <%_ } _%>
         const copy = this.convert(<%= entityInstance %>);
-        
         const filePostArr = [];
         let idx = 0;
         for (const key in copy) {
@@ -83,7 +82,6 @@ export class <%= entityAngularName %>Service {
             }
 
         }
-
         return forkJoin(...filePostArr).concatMap((results: FileCallbackModel[]) => {
             results.forEach((element: FileCallbackModel) => {
                 copy[element.key] = element.fileName;
@@ -91,7 +89,6 @@ export class <%= entityAngularName %>Service {
             });
             return this.http.post<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' });
         }).map((res: EntityResponseType) => this.convertResponse(res));
-       
     }
     <%_ if (entityAngularName.length <= 30) { _%>
 
@@ -158,6 +155,11 @@ export class <%= entityAngularName %>Service {
             .convertDateTimeFromServer(<%= entityInstance %>.<%=fields[idx].fieldName%>);
             <%_ } _%>
         <%_ } _%>
+        for (const key in copy) {                         
+            if (key.includes('Url')) {
+               copy[key] = STATIC_SERVER_URL + '/' + copy[key];
+            }
+        }                                                  
         return copy;
     }
 
