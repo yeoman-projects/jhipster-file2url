@@ -25,6 +25,7 @@ _%>
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+import { forkJoin } from 'rxjs/observable/forkJoin';
 import { SERVER_API_URL, FILE_UPLOAD_URL } from '../../app.constants';
 <%_ if (hasDate) { _%>
 
@@ -36,13 +37,13 @@ import { createRequestOption } from '../../shared';
 
 export type EntityResponseType = HttpResponse<<%= entityAngularName %>>;
 
-
-class fileCallback {
+class FileCallbackModel {
     constructor(
-        public fileUrl?: string,
+        public fileUrl: string,
         public fileName?: string,
-        public extensionName?: string
-    ){}
+        public extensionName?: string,
+        public key?: string
+    ){ }
 }
 
 @Injectable()
@@ -64,19 +65,33 @@ export class <%= entityAngularName %>Service {
         Observable<EntityResponseType> {
     <%_ } _%>
         const copy = this.convert(<%= entityInstance %>);
+        
+        const filePostArr = [];
+        let idx = 0;
+        for (const key in copy) {
+            const entityFileName = key.substring(0, key.indexOf('FileSource'));
+            if ((key.includes('FileSource'))) {
+                const formData = new FormData();
+                if (copy[key] && copy[key].files) {
+                    formData.append('file', copy[key].files[0]);
+                    formData.append('key', entityFileName);
+                    filePostArr[idx++] = this.http.post(this.fileUploadUrl, formData);
+                }
+            }
+            if (key.includes('Base64Data')) {
+                copy[key] = '';
+            }
 
-        const formData = new FormData();
-        formData.append('file', copy.imageFile.files[0]);
-        return this.http.post(this.fileUploadUrl, formData).concatMap((fileCallback: CallbackFileModel) => {
-            copy.<> = '';
-            copy.imageExampleContentType = '';
-            copy.fileUrl = fileCallback.fileUrl;
-            copy.filename = fileCallback.fileName;
-            return this.http.post<MyFile>(this.resourceUrl, copy, { observe: 'response' });
-        })
+        }
 
-        return this.http.post<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' })
-            .map((res: EntityResponseType) => this.convertResponse(res));
+        return forkJoin(...filePostArr).concatMap((results: FileCallbackModel[]) => {
+            results.forEach((element: FileCallbackModel) => {
+                copy[element.key] = element.fileName;
+                copy[element.key + 'Url'] = element.fileUrl;
+            });
+            return this.http.post<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' });
+        }).map((res: EntityResponseType) => this.convertResponse(res));
+       
     }
     <%_ if (entityAngularName.length <= 30) { _%>
 
