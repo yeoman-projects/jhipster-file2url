@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # generator-jhipster-entity-wfile
 [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 > JHipster module, add file entity save with url
@@ -55,3 +56,6 @@ MIT © [link uncle]()
 [travis-url]: https://travis-ci.org/pp7589/generator-jhipster-entity-wfile
 [daviddm-image]: https://david-dm.org/pp7589/generator-jhipster-entity-wfile.svg?theme=shields.io
 [daviddm-url]: https://david-dm.org/pp7589/generator-jhipster-entity-wfile
+=======
+# jhipster-file2url
+>>>>>>> b9af199ff3aebd6abad04308ccc25b9286a19cf6
