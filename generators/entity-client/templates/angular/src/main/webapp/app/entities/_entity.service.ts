@@ -82,7 +82,7 @@ export class <%= entityAngularName %>Service {
 
         }
         if (filePostArr.length <= 0) {
-            return this.http.post<Test1>(this.resourceUrl, copy, { observe: 'response' })
+            return this.http.post<<%= entityAngularName %>>(this.resourceUrl, copy, { observe: 'response' })
                 .map((res: EntityResponseType) => this.convertResponse(res));
         }
         return forkJoin(...filePostArr).concatMap((results: FileCallbackModel[]) => {

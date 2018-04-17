@@ -36,7 +36,7 @@
                 <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Url)">
                     <img [src]="<%= entityInstance %>.<%= fieldName %>Url" style="max-width: 100%;" alt="<%=entityInstance %> image"/>
                 </a>
-                {{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}
+                {{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>)}}
             </div>
             <%_ } else if (['Instant', 'ZonedDateTime'].includes(fieldType)) { _%>
             <span>{{<%=entityInstance %>.<%= fieldName %> | date:'medium'}}</span>
@@ -45,7 +45,7 @@
             <%_ } else if (isSaveUrl === true && fieldTypeBlobContent === 'any') { _%>
             <div *ngIf="<%= entityInstance %>.<%= fieldName %>Url">
                 <a (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Url)" jhiTranslate="entity.action.open">open</a>
-                {{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}
+                {{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}
             </div>
             <%_ } else { _%>
             <span>{{<%= entityInstance %>.<%= fieldName %>}}</span>

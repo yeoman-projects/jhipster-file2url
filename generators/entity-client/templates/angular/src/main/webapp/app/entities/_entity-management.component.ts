@@ -60,7 +60,8 @@ export class <%= entityAngularName %>Component implements OnInit, OnDestroy {
     <%_ if (fieldsContainBlob) { _%>
 
     byteSize(field) {
-        return this.dataUtils.byteSize(field);
+        return ;
+        // return this.dataUtils.byteSize(field);
     }
 
     openFile(contentType, field) {

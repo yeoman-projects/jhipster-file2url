@@ -112,7 +112,8 @@ export class <%= entityAngularName %>DialogComponent implements OnInit {
 
     <%_ if (fieldsContainBlob) { _%>
     byteSize(field) {
-        return this.dataUtils.byteSize(field);
+        return ;
+        // return this.dataUtils.byteSize(field);
     }
 
     openFile(contentType, field) {

@@ -76,9 +76,9 @@ _%>
                 <div *ngIf="<%= entityInstance %>.<%= fieldName %>Base64Data || <%=entityInstance %>.<%=fieldName%>Url" class="form-text text-danger clearfix">
                     <%_ if (fieldTypeBlobContent === 'any') { _%>
                     <a class="pull-left" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url)" jhiTranslate="entity.action.open">open</a><br>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url )}}</span>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url )}}</span>
                     <%_ } else { _%>
-                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url)}}</span>
+                    <span class="pull-left">{{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>Base64Data || <%= entityInstance %>.<%= fieldName %>Url)}}</span>
                     <%_ } _%>
                     <%_ if (fieldTypeBlobContent === 'image') { _%>
                     <button type="button" (click)="clearInputImage( <%=fieldName %>Base64Data ? '<%= fieldName %>Base64Data' : '<%= fieldName %>Url', '<%= fieldName %>ContentType', 'fileImage')" class="btn btn-secondary btn-xs pull-right">

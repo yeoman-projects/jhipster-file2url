@@ -79,12 +79,12 @@
                     <a *ngIf="<%= entityInstance %>.<%= fieldName %>Url" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Url)">
                         <img [src]="<%=entityInstance %>.<%=fieldName%>Url" style="max-height: 30px;" alt="<%=entityInstance %> image"/>
                     </a>
-                    <span *ngIf="<%= entityInstance %>.<%= fieldName %>Url">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}</span>
+                    <span *ngIf="<%= entityInstance %>.<%= fieldName %>Url">{{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}</span>
                 </td>
                 <%_ } else if (isSaveUrl === true && fieldTypeBlobContent === 'any') { _%>
                 <td>
                     <a *ngIf="<%= entityInstance %>.<%= fieldName %>Url" (click)="openFile(<%= entityInstance %>.<%= fieldName %>ContentType, <%= entityInstance %>.<%= fieldName %>Url)" jhiTranslate="entity.action.open">open</a>
-                    <span *ngIf="<%= entityInstance %>.<%= fieldName %>Url">{{<%= entityInstance %>.<%= fieldName %>ContentType}}, {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}</span>
+                    <span *ngIf="<%= entityInstance %>.<%= fieldName %>Url">{{<%= entityInstance %>.<%= fieldName %>ContentType}} {{byteSize(<%= entityInstance %>.<%= fieldName %>Url)}}</span>
                 </td>
                 <%_ } else if (fields[idx].fieldIsEnum) { _%>
                 <td jhiTranslate="{{'<%= angularAppName %>.<%= fieldType %>.' + <%= entityInstance %>.<%= fieldName %>}}">{{<%= entityInstance %>.<%= fieldName %>}}</td>
