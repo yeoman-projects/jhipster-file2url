@@ -215,6 +215,13 @@ module.exports = class extends BaseGenerator {
                     // existing entity reading values from file
                     this.log(`\nThe entity ${entityName} is being updated.\n`);
                     this.loadEntityJson();
+                    let fieldsArr = this.context.fields;
+                    for (const key in fieldsArr) {     
+                        if (fieldsArr[key].fieldTypeBlobContent === 'image' || fieldsArr[key].fieldTypeBlobContent === 'any') {
+                            fieldsArr[key].fieldType = 'String',
+                            fieldsArr[key].isSaveUrl = true;
+                        }
+                    }
                 }
             },
 
