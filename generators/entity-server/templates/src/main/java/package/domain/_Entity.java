@@ -174,7 +174,7 @@ public class <%= entityClass %> implements Serializable {
         if (fields[idx].fieldIsEnum) { _%>
     @Enumerated(EnumType.STRING)
         <%_ }
-        if (fieldType === 'byte[]' && isSaveUrl === false) { _%>
+        if ((fieldType === 'byte[]' && isSaveUrl === false) || (fieldType === 'byte[]' && fieldTypeBlobContent === 'text')) { _%>
     @Lob
         <%_ }
         if (['Instant', 'ZonedDateTime', 'LocalDate'].includes(fieldType)) { _%>

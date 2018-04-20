@@ -68,7 +68,7 @@ export class <%= entityAngularName %>Service {
         let idx = 0;
         for (const key in copy) {
             const entityFileName = key.substring(0, key.indexOf('FileSource'));
-            if (key.includes('FileSource') && copy[key]) {
+            if (key.endsWith('FileSource') && copy[key]) {
                 const formData = new FormData();
                 if (copy[key] && copy[key].files) {
                     formData.append('file', copy[key].files[0]);
@@ -76,7 +76,7 @@ export class <%= entityAngularName %>Service {
                     filePostArr[idx++] = this.http.post(this.fileUploadUrl, formData);
                 }
             }
-            if (key.includes('Base64Data')) {
+            if (key.endsWith('Base64Data')) {
                 copy[key] = '';
             }
 
@@ -108,7 +108,7 @@ export class <%= entityAngularName %>Service {
         const reg = /^(?:([A-Za-z]+):)?(\/{0,3})([0-9.\-A-Za-z]+)(?::(\d+))?(?:\/([^?#]*))?(?:\?([^#]*))?(?:#(.*))?$/;
         for (const key in copy) {
             const entityFileName = key.substring(0, key.indexOf('FileSource'));
-            if (key.includes('FileSource') && copy[key]) {
+            if (key.endsWith('FileSource') && copy[key]) {
                 const formData = new FormData();
                 if (copy[key] && copy[key].files) {
                     formData.append('file', copy[key].files[0]);
@@ -116,10 +116,10 @@ export class <%= entityAngularName %>Service {
                     filePostArr[idx++] = this.http.post(this.fileUploadUrl, formData);
                 }
             }
-            if (key.includes('Base64Data')) {
+            if (key.endsWith('Base64Data')) {
                 copy[key] = '';
             }
-            if (key.includes('Url') && copy[key]) {
+            if (key.endsWith('Url') && copy[key]) {
                 const exec = reg.exec(copy[key]);
                 copy[key] = exec[5];
             }
@@ -190,7 +190,7 @@ export class <%= entityAngularName %>Service {
             <%_ } _%>
         <%_ } _%>
         for (const key in copy) {
-            if (key.includes('Url') && copy[key]) {
+            if (key.endsWith('Url') && copy[key]) {
                copy[key] = STATIC_SERVER_URL + '/' + copy[key];
             }
         }

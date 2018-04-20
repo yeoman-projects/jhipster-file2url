@@ -66,6 +66,8 @@
             const fieldType = fields[idx].fieldType;
             const fieldTypeBlobContent = fields[idx].fieldTypeBlobContent;
             const columnName = fields[idx].fieldNameAsDatabaseColumn;
+            const isSaveUrl = fields[idx].isSaveUrl;
+
             let columnType;
             if (fieldType === 'String' || fields[idx].fieldIsEnum) {
                 columnType="varchar(" + maxlength + ")";
@@ -108,8 +110,11 @@
                 <constraints nullable="<%= nullable %>" />
                 <%_ } _%>
             </column>
-            <%_ if (fieldType === 'byte[]' && fieldTypeBlobContent !== 'text') { _%>
+            <%_ if (isSaveUrl === true && fieldTypeBlobContent !== 'text') { _%>
             <column name="<%=columnName %>_content_type" type="varchar(255)">
+                <constraints nullable="<%= nullable %>" />
+            </column>
+            <column name="<%=columnName %>_url" type="varchar(255)">
                 <constraints nullable="<%= nullable %>" />
             </column>
             <%_ }  _%>
