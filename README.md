@@ -1,11 +1,9 @@
-<<<<<<< HEAD
-# generator-jhipster-entity-wfile
-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
-> JHipster module, add file entity save with url
 
 # Introduction
 
 This is a [JHipster](http://jhipster.github.io/) module, that is meant to be used in a JHipster application.
+**It can generate entity save not blob but url to sql database** 
+so you should add a static server and a fileupload controller or you also can upload to oss then save the return value url to database
 
 # Prerequisites
 
@@ -49,13 +47,3 @@ npm update -g generator-jhipster-entity-wfile
 
 MIT © [link uncle]()
 
-
-[npm-image]: https://img.shields.io/npm/v/generator-jhipster-entity-wfile.svg
-[npm-url]: https://npmjs.org/package/generator-jhipster-entity-wfile
-[travis-image]: https://travis-ci.org/pp7589/generator-jhipster-entity-wfile.svg?branch=master
-[travis-url]: https://travis-ci.org/pp7589/generator-jhipster-entity-wfile
-[daviddm-image]: https://david-dm.org/pp7589/generator-jhipster-entity-wfile.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/pp7589/generator-jhipster-entity-wfile
-=======
-# jhipster-file2url
->>>>>>> b9af199ff3aebd6abad04308ccc25b9286a19cf6
