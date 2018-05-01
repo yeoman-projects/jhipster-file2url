@@ -49,7 +49,6 @@ module.exports = class extends Generator {
         this.jhipsterAppConfig = this.getJhipsterAppConfig();
 
         for (const key in this.jhipsterAppConfig) {
-            console.log(key);
             const element = this.jhipsterAppConfig[key];
             this.config.set(key, element);
         }

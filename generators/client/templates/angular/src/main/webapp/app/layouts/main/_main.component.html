@@ -17,11 +17,17 @@
  limitations under the License.
 -%>
 <<%= jhiPrefixDashed %>-page-ribbon></<%= jhiPrefixDashed %>-page-ribbon>
-<div>
-    <router-outlet name="navbar"></router-outlet>
-</div>
-<div class="container-fluid">
-    <div class="card jh-card">
+<router-outlet name="navbar"></router-outlet>
+<div class="app-body">
+    <app-sidebar [fixed]="true" [display]="'lg'">
+        <div class="sidebar-nav ps coreui-sidebar-nav">
+            <ul class="nav">
+                <!-- jhipster-needle-add-entity-to-menu - JHipster will add entities to the menu here -->
+            </ul>
+        </div>
+        <app-sidebar-minimizer></app-sidebar-minimizer>
+    </app-sidebar>
+    <div class="card jh-card main">
         <router-outlet></router-outlet>
         <router-outlet name="popup"></router-outlet>
     </div>

@@ -225,18 +225,18 @@ module.exports = class extends PrivateBase {
                     ]
                 }, this);
             } else if (this.clientFramework === 'angularX') {
-                entityMenuPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/navbar/navbar.component.html`;
+                entityMenuPath = `${CLIENT_MAIN_SRC_DIR}app/layouts/main/main.component.html`;
                 jhipsterUtils.rewriteFile({
                     file: entityMenuPath,
                     needle: 'jhipster-needle-add-entity-to-menu',
                     splicable: [
-                        this.stripMargin(`|<li>
-                             |                        <a class="dropdown-item" routerLink="${routerName}" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="collapseNavbar()">
-                             |                            <i class="fa fa-fw fa-asterisk" aria-hidden="true"></i>
-                             |                            <span${enableTranslation ? ` jhiTranslate="global.menu.entities.${_.camelCase(routerName)}"` : ''}>${_.startCase(routerName)}</span>
-                             |                        </a>
-                             |                    </li>`)
-                    ]
+                        this.stripMargin(`|<li class="nav-item">
+                             |                  <a class="nav-link" routerLink="${routerName}" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                             |                     <i class="nav-icon icon-puzzle" aria-hidden="true"></i>
+                             |                     <span${enableTranslation ? ` jhiTranslate="global.menu.entities.${_.camelCase(routerName)}"` : ''}>${_.startCase(routerName)}</span>
+                             |                  </a>
+                             |             </li>`)
+                    ],
                 }, this);
             } else {
                 // React

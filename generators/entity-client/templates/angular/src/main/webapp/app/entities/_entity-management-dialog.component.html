@@ -108,6 +108,13 @@ _%>
             <%_ } else if(fieldTypeBlobContent === 'text') { _%>
             <textarea class="form-control" name="<%= fieldName %>" id="field_<%= fieldName %>"
                 [(ngModel)]="<%= entityInstance %>.<%= fieldName %>" <%- include ng_validators %>></textarea>
+            <%_ } else if(fieldType === 'Boolean') { _%>
+            <div>
+                <label class="switch switch-label switch-pill switch-outline-danger-alt">
+                    <input type="checkbox" class="switch-input" name="<%= fieldName %>" id="field_<%= fieldName %>" [(ngModel)]="<%= entityInstance %>.<%= fieldName %>">
+                    <span class="switch-slider" data-checked="on" data-unchecked="off"></span>
+                </label>
+            </div>
             <%_ } else { _%>
             <input type="<%= fieldInputType %>" class="form-control" name="<%= fieldName %>" id="field_<%= fieldName %>"
                 [(ngModel)]="<%= entityInstance %>.<%= fieldName %>" <%- include ng_validators %>/>
