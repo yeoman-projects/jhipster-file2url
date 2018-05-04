@@ -1,5 +1,5 @@
 {
-  "name": "generator-jhipster-entity-wfile",
+  "name": "generator-jhipster-file2url",
   "version": "0.0.0",
   "description": "add file entity save with url",
   "keywords": [
@@ -7,7 +7,7 @@
     "jhipster-module",
     "jhipster-5"
   ],
-  "homepage": "https://github.com/pp7589/generator-jhipster-entity-wfile",
+  "homepage": "https://github.com/pp7589/generator-jhipster-file2url",
   "author": {
     "name": "link uncle",
     "email": "916969890@qq.com",
@@ -19,7 +19,7 @@
   "main": "generators/app/index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pp7589/generator-jhipster-entity-wfile.git"
+    "url": "git+https://github.com/pp7589/generator-jhipster-file2url.git"
   },
   "dependencies": {
     "chalk": "2.1.0",
@@ -52,6 +52,6 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pp7589/generator-jhipster-entity-wfile/issues"
+    "url": "https://github.com/pp7589/generator-jhipster-file2url/issues"
   }
 }
